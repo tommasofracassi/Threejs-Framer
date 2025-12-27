@@ -15,6 +15,14 @@ const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
 const cube = new THREE.Mesh(geometry, material)
 scene.add(cube)
 
+const BoxGeometry = new THREE.BoxGeometry(1, 1, 1)
+const materialBox = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+const cubeGreen = new THREE.Mesh(BoxGeometry, materialBox)
+scene.add(cubeGreen)
+
+//Positions
+cubeGreen.position.x = 2
+
 // Sizes
 const sizes = {
     width: window.innerWidth,
