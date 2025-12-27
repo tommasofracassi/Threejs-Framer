@@ -21,7 +21,7 @@ const cubeGreen = new THREE.Mesh(BoxGeometry, materialBox)
 scene.add(cubeGreen)
 
 const Dodgeometry = new THREE.DodecahedronGeometry();
-const Dodmaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+const Dodmaterial = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 const dodecahedron = new THREE.Mesh( Dodgeometry, Dodmaterial );
 scene.add( dodecahedron );
 
