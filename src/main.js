@@ -20,8 +20,14 @@ const materialBox = new THREE.MeshBasicMaterial({ color: 0xffff00 })
 const cubeGreen = new THREE.Mesh(BoxGeometry, materialBox)
 scene.add(cubeGreen)
 
+const Dodgeometry = new THREE.DodecahedronGeometry();
+const Dodmaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+const dodecahedron = new THREE.Mesh( Dodgeometry, Dodmaterial );
+scene.add( dodecahedron );
+
 //Positions
 cubeGreen.position.x = 2
+dodecahedron.position.x = -2
 
 // Sizes
 const sizes = {
