@@ -14,6 +14,6 @@ body {
     top: 0;
     left: 0;
     outline: none;
-    /* background: #4f69ff;
-    background: linear-gradient(175deg, rgba(79, 105, 255, 1) 0%, rgba(212, 234, 255, 1) 50%, rgba(56, 109, 255, 1) 100%); */
+    background: #4f69ff;
+    background: linear-gradient(175deg, rgba(79, 105, 255, 1) 0%, rgba(212, 234, 255, 1) 50%, rgba(56, 109, 255, 1) 100%);
 }
