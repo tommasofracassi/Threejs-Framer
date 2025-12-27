@@ -2,6 +2,8 @@ import './style.css';
 
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -9,25 +11,81 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-// Object
-const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
+// Draco loader
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('draco/')
 
-const BoxGeometry = new THREE.BoxGeometry(1, 1, 1)
-const materialBox = new THREE.MeshBasicMaterial({ color: 0xffff00 })
-const cubeGreen = new THREE.Mesh(BoxGeometry, materialBox)
-scene.add(cubeGreen)
+// GLTF loader
+const gltfLoader = new GLTFLoader()
+gltfLoader.setDRACOLoader(dracoLoader)
 
-const Dodgeometry = new THREE.DodecahedronGeometry();
-const Dodmaterial = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const dodecahedron = new THREE.Mesh( Dodgeometry, Dodmaterial );
-scene.add( dodecahedron );
+/**
+ * Materials
+ */
+const glossPlasticMaterial = new THREE.MeshStandardMaterial({
+    name: 'GlossPlastic',
+    color: 0x111111,
+    metalness: 0.8,
+    roughness: 0.2,
+});
 
-//Positions
-cubeGreen.position.x = 2
-dodecahedron.position.x = -2
+const lenseGlassMaterial = new THREE.MeshStandardMaterial({
+    name: 'LenseGlass',
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0,
+    transparent: true,
+    opacity: 0.25,
+});
+
+
+/**
+ * Models
+ */
+let model;
+
+gltfLoader.load('/models/MetaDisplay4.glb', (gltf) => {
+
+    console.log('Model loaded', gltf.scene)
+    model = gltf.scene;
+
+    gltf.scene.traverse((child) => {
+        if (!child.isMesh) return;
+
+        console.log(child.name)
+
+        if (child.name === 'Cube') {
+            child.material = glossPlasticMaterial
+        }
+
+        if (child.name === 'Cube_1' || child.name === 'Cameras') {
+            child.material = lenseGlassMaterial
+        }
+    })
+
+    model.position.y = -3.2;
+    model.position.x = -1;
+    scene.add(gltf.scene)
+})
+
+
+
+// Axes helper
+scene.add(new THREE.AxesHelper(5))
+
+
+/**
+ * Lights
+ **/
+const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+scene.add(ambientLight)
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 2)
+directionalLight.position.set(5, 5, 5)
+scene.add(directionalLight)
+
+
+
 
 // Sizes
 const sizes = {
@@ -60,8 +118,10 @@ controls.enableDamping = true
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha: true
 })
+scene.background = null;
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
