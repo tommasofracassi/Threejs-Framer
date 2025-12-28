@@ -6,6 +6,19 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { PMREMGenerator } from 'three';
+import Stats from 'stats.js'
+import GUI from 'lil-gui'
+import { createGalaxy } from './Galaxy.js'
+
+
+
+/**
+ * Stats
+ */
+const stats = new Stats()
+stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom)
+
 
 
 
@@ -27,28 +40,28 @@ gltfLoader.setDRACOLoader(dracoLoader)
  * Materials
  */
 const glossPlasticMaterial = new THREE.MeshStandardMaterial({
-  name: 'GlossPlastic',
-  color: new THREE.Color(0.02, 0.02, 0.02), // nero realistico
-  metalness: 0.0,
-  roughness: 0.15, // lucido ma plastico
-  envMapIntensity: 1.2,
+    name: 'GlossPlastic',
+    color: new THREE.Color(0.02, 0.02, 0.02), // nero realistico
+    metalness: 0.0,
+    roughness: 0.15, // lucido ma plastico
+    envMapIntensity: 1.2,
 });
 
 
 const lenseGlassMaterial = new THREE.MeshPhysicalMaterial({
-  name: 'LenseGlass',
-  color: new THREE.Color(1, 1, 1),
-  metalness: 0,
-  roughness: 0.05,
+    name: 'LenseGlass',
+    color: new THREE.Color(1, 1, 1),
+    metalness: 0,
+    roughness: 0.05,
 
-  transmission: 1.0,   // vetro vero
-  thickness: 0.2,      // spessore lente
-  ior: 1.5,            // indice rifrazione vetro
-  transparent: true,
+    transmission: 1.0,   // vetro vero
+    thickness: 0.2,      // spessore lente
+    ior: 1.5,            // indice rifrazione vetro
+    transparent: true,
 
-  envMapIntensity: 1.5,
-  clearcoat: 0.1,
-  clearcoatRoughness: 0.05,
+    envMapIntensity: 1.5,
+    clearcoat: 0.1,
+    clearcoatRoughness: 0.05,
 });
 
 
@@ -81,6 +94,18 @@ gltfLoader.load('/models/MetaDisplay4.glb', (gltf) => {
     model.position.x = -1;
     scene.add(gltf.scene)
 })
+
+
+/**
+ * Galaxy
+ */
+// GUI
+const gui = new GUI()
+
+// GALASSIA
+const galaxy = createGalaxy(scene, gui)
+galaxy.position.set(0, 0.5, 1.5)
+galaxy.rotation.x = Math.PI / 2;
 
 
 
@@ -152,20 +177,20 @@ const pmremGenerator = new PMREMGenerator(renderer);
 pmremGenerator.compileEquirectangularShader();
 
 async function loadHDR() {
-  const loader = new HDRLoader();
-  try {
-    const texture = await loader.loadAsync('/textures/studio.hdr');
-    
-    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+    const loader = new HDRLoader();
+    try {
+        const texture = await loader.loadAsync('/textures/studio.hdr');
 
-    scene.environment = envMap;
-    // scene.background = envMap;
+        const envMap = pmremGenerator.fromEquirectangular(texture).texture;
 
-    texture.dispose();
-    pmremGenerator.dispose();
-  } catch (err) {
-    console.error('Errore caricamento HDR:', err);
-  }
+        scene.environment = envMap;
+        // scene.background = envMap;
+
+        texture.dispose();
+        pmremGenerator.dispose();
+    } catch (err) {
+        console.error('Errore caricamento HDR:', err);
+    }
 }
 
 loadHDR();
@@ -176,6 +201,9 @@ loadHDR();
 const clock = new THREE.Clock()
 
 const tick = () => {
+
+    stats.begin()
+
     const elapsedTime = clock.getElapsedTime()
 
     // Update controls
@@ -186,6 +214,8 @@ const tick = () => {
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
+
+    stats.end()
 }
 
 tick()  
