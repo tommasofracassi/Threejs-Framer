@@ -135,6 +135,10 @@ export function createGalaxy(scene, gui = null) {
         targetRandomness = Math.min(targetRandomness + 1, 1)
     }
 
+    const resetRandomness = () => {
+        targetRandomness = 0.2; // Valore originale di riposo
+    }
+
     if (gui) {
         gui.add(parameters, 'randomness', 0, 1, 0.001).onChange(v => targetRandomness = v)
     }
@@ -142,6 +146,7 @@ export function createGalaxy(scene, gui = null) {
     return {
         instance: galaxyGroup,
         update,
-        increaseRandomness
+        increaseRandomness,
+        resetRandomness
     }
 }

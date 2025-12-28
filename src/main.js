@@ -109,7 +109,7 @@ const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
 // Variabili per l'animazione del modello
-let targetModelZ = 0; 
+let targetModelZ = 0;
 const originalModelZ = 0;
 
 // GALASSIA
@@ -118,28 +118,51 @@ const galaxy = createGalaxy(scene, gui)
 galaxy.instance.position.set(0, 0.5, 1.5)
 galaxy.instance.rotation.x = Math.PI / 2
 
-// 3. Click listener
-window.addEventListener('click', (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+/**
+ * Hover logic
+ **/
+let isHovered = false; // Stato per capire se il mouse è sopra il modello
 
-    raycaster.setFromCamera(mouse, camera)
+window.addEventListener('mousemove', (event) => {
+    // Aggiorna le coordinate del mouse
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
 
-    // Assicurati che 'model' sia caricato prima di cliccare
-    if(model) {
-        const intersects = raycaster.intersectObjects(model.children, true)
+// Funzione da chiamare nel tick per gestire l'hover
+const handleHover = () => {
+    raycaster.setFromCamera(mouse, camera);
+
+    if (model) {
+        // Controlla collisioni tra mouse e modello
+        const intersects = raycaster.intersectObjects(model.children, true);
+
         if (intersects.length > 0) {
-            galaxy.increaseRandomness()
-            
-            // Imposta il target del movimento
-            targetModelZ = -1.5; // Si avvicina
+            document.body.style.cursor = 'pointer';
+
+            // --- MOUSE SOPRA IL MODELLO ---
+            if (!isHovered) {
+                // Azioni eseguite SOLO nel momento in cui il mouse ENTRA
+                galaxy.increaseRandomness();
+                isHovered = true;
+            }
+            targetModelZ = -1.0; // Spostamento quando hover è attivo
+        } else {
+            document.body.style.cursor = 'default';
+
+            // --- MOUSE FUORI DAL MODELLO ---
+            if (isHovered) {
+                galaxy.resetRandomness();
+                // Azioni eseguite SOLO nel momento in cui il mouse ESCE
+                isHovered = false;
+            }
+            targetModelZ = originalModelZ; // Torna alla posizione originale
         }
     }
-})
-
+};
 
 // Axes helper
-scene.add(new THREE.AxesHelper(5))
+// scene.add(new THREE.AxesHelper(5))
 
 
 /**
@@ -240,6 +263,8 @@ const tick = () => {
 
     const elapsedTime = clock.getElapsedTime()
     galaxy.update(elapsedTime)
+
+    handleHover();
 
     if (model) {
         model.position.z = THREE.MathUtils.lerp(
