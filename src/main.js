@@ -101,12 +101,41 @@ gltfLoader.load('/models/MetaDisplay4.glb', (gltf) => {
  */
 // GUI
 const gui = new GUI()
+/**
+ * Click animation
+ **/
+
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+
+// Variabili per l'animazione del modello
+let targetModelZ = 0; 
+const originalModelZ = 0;
 
 // GALASSIA
 const galaxy = createGalaxy(scene, gui)
-galaxy.position.set(0, 0.5, 1.5)
-galaxy.rotation.x = Math.PI / 2;
 
+galaxy.instance.position.set(0, 0.5, 1.5)
+galaxy.instance.rotation.x = Math.PI / 2
+
+// 3. Click listener
+window.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
+    raycaster.setFromCamera(mouse, camera)
+
+    // Assicurati che 'model' sia caricato prima di cliccare
+    if(model) {
+        const intersects = raycaster.intersectObjects(model.children, true)
+        if (intersects.length > 0) {
+            galaxy.increaseRandomness()
+            
+            // Imposta il target del movimento
+            targetModelZ = -1.5; // Si avvicina
+        }
+    }
+})
 
 
 // Axes helper
@@ -147,13 +176,18 @@ window.addEventListener('resize', () => {
 
 // Camera
 const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(0, 5, -10);   // più indietro
+camera.position.set(0, 0, -10);   // più indietro
 camera.lookAt(0, 0, 0);
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
+
+
+
+
+
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -205,6 +239,15 @@ const tick = () => {
     stats.begin()
 
     const elapsedTime = clock.getElapsedTime()
+    galaxy.update(elapsedTime)
+
+    if (model) {
+        model.position.z = THREE.MathUtils.lerp(
+            model.position.z, // Posizione attuale
+            targetModelZ,     // Posizione dove vogliamo arrivare
+            0.1               // Velocità dell'animazione (0.1 è fluido)
+        )
+    }
 
     // Update controls
     controls.update()
